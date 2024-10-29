@@ -235,6 +235,10 @@
   background: #5decaa;
 }
 
+#KioskBoard-VirtualKeyboard .kioskboard-row-bottom span.kioskboard-key-capslock.capslock-auto::before {
+  background: #2329f6;
+}
+
 #KioskBoard-VirtualKeyboard .kioskboard-row-bottom span.kioskboard-key-enter,
 #KioskBoard-VirtualKeyboard .kioskboard-row-bottom span.kioskboard-key-backspace {
   position: relative;
@@ -511,6 +515,14 @@
 #KioskBoard-VirtualKeyboard.kioskboard-theme-dark span.kioskboard-key-capslock.capslock-active::before,
 #KioskBoard-VirtualKeyboard.kioskboard-theme-material span.kioskboard-key-capslock.capslock-active::before {
   background: #5decaa;
+}
+
+#KioskBoard-VirtualKeyboard.kioskboard-theme-oldschool span.kioskboard-key-capslock.capslock-auto::before,
+#KioskBoard-VirtualKeyboard.kioskboard-theme-flat span.kioskboard-key-capslock.capslock-auto::before,
+#KioskBoard-VirtualKeyboard.kioskboard-theme-light span.kioskboard-key-capslock.capslock-auto::before,
+#KioskBoard-VirtualKeyboard.kioskboard-theme-dark span.kioskboard-key-capslock.capslock-auto::before,
+#KioskBoard-VirtualKeyboard.kioskboard-theme-material span.kioskboard-key-capslock.capslock-auto::before {
+  background: #2329f6;
 }
 
 #KioskBoard-VirtualKeyboard.kioskboard-theme-flat .kioskboard-row span[class^="kioskboard-key"] svg,

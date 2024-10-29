@@ -54,6 +54,7 @@
     theme: 'light', // "light" || "dark" || "flat" || "material" || "oldschool"
     autoScroll: true,
     capsLockActive: true,
+    capsLockAuto: false,
     allowRealKeyboard: false,
     allowMobileKeyboard: false,
     cssAnimations: true,
@@ -68,6 +69,7 @@
     keysEnterText: 'Enter',
     keysEnterCallback: undefined,
     keysEnterCanClose: true,
+    keyboardOpenCallback: undefined,
   };
   var kioskBoardCachedKeys;
   var kioskBoardNewOptions;
@@ -359,6 +361,9 @@
         // each input focus listener: begin
         var inputFocusListener = function (e) {
           // input element variables: begin
+          if (typeof opt.keyboardOpenCallback === 'function' && !opt.keyboardOpenCallback(input)) {
+            return false;
+          }
           var theInput = e.currentTarget;
           var theInputSelIndex = 0;
           var theInputValArray = [];
@@ -394,7 +399,8 @@
           var fontWeight = typeof opt.keysFontWeight === 'string' && opt.keysFontWeight.length > 0 ? opt.keysFontWeight : 'normal';
 
           // static keys: begin
-          var isCapsLockActive = opt.capsLockActive === true;
+          var isCapsLockAuto = opt.capsLockAuto === true;
+          var isCapsLockActive = opt.capsLockActive === true || isCapsLockAuto;
           var keysIconWidth = typeof opt.keysIconSize === 'string' && opt.keysIconSize.length > 0 ? opt.keysIconSize : '25px';
           var keysIconColor = '#707070';
           var keysAllowSpacebar = opt.keysAllowSpacebar === true;
@@ -403,7 +409,7 @@
           var keysEnterText = typeof opt.keysEnterText === 'string' && opt.keysEnterText.length > 0 ? opt.keysEnterText : 'Enter';
 
           var spaceKey = '<span style="font-family:' + fontFamily + ',sans-serif;font-weight:' + fontWeight + ';font-size:' + fontSize + ';" class="kioskboard-key kioskboard-key-space ' + (keysAllowSpacebar ? 'spacebar-allowed' : 'spacebar-denied') + '" data-value="' + spaceKeyValue + '">' + keysSpacebarText + '</span>';
-          var capsLockKey = '<span style="font-family:' + fontFamily + ',sans-serif;font-weight:' + fontWeight + ';font-size:' + fontSize + ';" class="kioskboard-key-capslock ' + (isCapsLockActive ? 'capslock-active' : '') + '">' + kioskBoardIconCapslock(keysIconWidth, keysIconColor) + '</span>';
+          var capsLockKey = '<span style="font-family:' + fontFamily + ',sans-serif;font-weight:' + fontWeight + ';font-size:' + fontSize + ';" class="kioskboard-key-capslock ' + (isCapsLockAuto ? 'capslock-auto' : (isCapsLockActive ? 'capslock-active' : '')) + '">' + kioskBoardIconCapslock(keysIconWidth, keysIconColor) + '</span>';
           var backspaceKey = '<span style="font-family:' + fontFamily + ',sans-serif;font-weight:' + fontWeight + ';font-size:' + fontSize + ';" class="kioskboard-key-backspace">' + kioskBoardIconBackspace(keysIconWidth, keysIconColor) + '</span>';
           var enterKey = '<span style="font-family:' + fontFamily + ',sans-serif;font-weight:' + fontWeight + ';font-size:' + fontSize + ';" class="kioskboard-key-enter">' + keysEnterText + '</span>';
           // static keys: end
@@ -643,6 +649,17 @@
                     keyValue = keyValue.toLocaleLowerCase(keyboardLanguage);
                   }
 
+                  if (isCapsLockAuto) {
+                    isCapsLockActive = false;
+                    isCapsLockAuto = false;
+                    kioskBoardVirtualKeyboard.classList.add('kioskboard-tolowercase');
+                    kioskBoardVirtualKeyboard.classList.remove('kioskboard-touppercase');
+                    var capsLockKeyElm = window.document.querySelector('.kioskboard-key-capslock');
+                    if (capsLockKeyElm) {
+                      capsLockKeyElm.classList.remove('capslock-auto');
+                    }
+                  }
+
                   var keyValArr = keyValue.split('');
                   for (var keyValIndex = 0; keyValIndex < keyValArr.length; keyValIndex++) {
                     // update the selectionStart
@@ -675,16 +692,24 @@
                 // focus the input
                 input.focus();
 
-                if (e.currentTarget.classList.contains('capslock-active')) {
+                if (e.currentTarget.classList.contains('capslock-auto')) {
+                  e.currentTarget.classList.remove('capslock-auto');
+                  kioskBoardVirtualKeyboard.classList.add('kioskboard-tolowercase');
+                  kioskBoardVirtualKeyboard.classList.remove('kioskboard-touppercase');
+                  isCapsLockActive = false;
+                  isCapsLockAuto = false;
+                } else if (e.currentTarget.classList.contains('capslock-active')) {
                   e.currentTarget.classList.remove('capslock-active');
                   kioskBoardVirtualKeyboard.classList.add('kioskboard-tolowercase');
                   kioskBoardVirtualKeyboard.classList.remove('kioskboard-touppercase');
                   isCapsLockActive = false;
+                  isCapsLockAuto = false;
                 } else {
                   e.currentTarget.classList.add('capslock-active');
                   kioskBoardVirtualKeyboard.classList.remove('kioskboard-tolowercase');
                   kioskBoardVirtualKeyboard.classList.add('kioskboard-touppercase');
                   isCapsLockActive = true;
+                  isCapsLockAuto = false;
                 }
               });
             }
@@ -727,11 +752,15 @@
               keysEventListeners(specialCharacterKeyElm, function (e) {
                 e.preventDefault();
                 input.focus(); // focus the input
-                if (e.currentTarget.classList.contains('specialcharacter-active')) {
+                if (e.currentTarget.classList.contains('specialcharacter-auto')) {
+                  e.currentTarget.classList.remove('specialcharacter-auto');
+                  e.currentTarget.classList.add('specialcharacter-active');
+                  specialCharactersRowElm.classList.add('kioskboard-specialcharacter-show');
+                } else if (e.currentTarget.classList.contains('specialcharacter-active')) {
                   e.currentTarget.classList.remove('specialcharacter-active');
                   specialCharactersRowElm.classList.remove('kioskboard-specialcharacter-show');
                 } else {
-                  e.currentTarget.classList.add('specialcharacter-active');
+                  e.currentTarget.classList.add('specialcharacter-auto');
                   specialCharactersRowElm.classList.add('kioskboard-specialcharacter-show');
                 }
               });
@@ -743,6 +772,7 @@
                 e.preventDefault();
                 input.focus(); // focus the input
                 specialCharacterKeyElm.classList.remove('specialcharacter-active');
+                specialCharacterKeyElm.classList.remove('specialcharacter-auto');
                 specialCharactersRowElm.classList.remove('kioskboard-specialcharacter-show');
               });
             }
@@ -756,7 +786,7 @@
                   removeKeyboard();
                 }
                 if (typeof opt.keysEnterCallback === 'function') {
-                  opt.keysEnterCallback();
+                  opt.keysEnterCallback(input);
                 }
               });
             }

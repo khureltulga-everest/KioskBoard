@@ -82,6 +82,12 @@ declare namespace KioskBoard {
     capsLockActive?: boolean;
 
     /**
+     * @property {boolean} - Optional, Uppercase or lowercase first character only. Uppercased when `true`.
+     * @defaultValue `true`
+     */
+    capsLockAuto?: boolean;
+
+    /**
      * @property {boolean} - Optional, Allow or prevent real/physical keyboard usage. Prevented when `false`.
      * @defaultValue `false`
      *
@@ -159,13 +165,19 @@ declare namespace KioskBoard {
      * @property {function} - Optional, The callback function of the Enter key. This function will be called when the enter key has been clicked.
      * @defaultValue `undefined`
      */
-    keysEnterCallback?: () => void;
+    keysEnterCallback?: (value) => void;
 
     /**
      * @property {boolean} - Optional, The Enter key can close and remove the keyboard. Prevented when `false`
      * @defaultValue `true`
      */
     keysEnterCanClose?: boolean;
+
+    /**
+     * @property {function} - Optional, The callback function of the virtual keyboard. This function will be called when the input get focused. Return false to prevent keyboard open.
+     * @defaultValue `undefined`
+     */
+    keyboardOpenCallback?: (input: HTMLInputElement | HTMLTextAreaElement) => boolean|void;
   }
 
   /**
